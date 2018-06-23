@@ -6,12 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 
 public class PhotoView extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -21,9 +19,11 @@ public class PhotoView extends SurfaceView implements SurfaceHolder.Callback {
     DrawThread thread;
     private Canvas mCanvas;
     private Bitmap mPhoto;
+    private Bitmap mArObject;
     private RectF mDebugRect;
-    private PointF mStartPoint;
+    private PointF mOldPoint;
     private PointF mCurrentPoint;
+    private PointF mArPosition;
 
 
     public PhotoView(Context context, Bitmap photo) {
@@ -32,7 +32,7 @@ public class PhotoView extends SurfaceView implements SurfaceHolder.Callback {
         mSurfaceHolder.addCallback(this);
         mPhoto = photo;
         mDebugRect = new RectF(0, 0, 0, 0);
-        mStartPoint = new PointF(0, 0);
+        mOldPoint = new PointF(0, 0);
     }
 
     @Override
@@ -58,20 +58,20 @@ public class PhotoView extends SurfaceView implements SurfaceHolder.Callback {
         PointF currentPoint = new PointF(x, y);
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                mStartPoint.x = x;
-                mStartPoint.y = y;
+                mOldPoint.x = x;
+                mOldPoint.y = y;
                 break;
             case MotionEvent.ACTION_UP:
                 break;
             case MotionEvent.ACTION_MOVE:
-                float dx = x - mStartPoint.x;
-                float dy = y - mStartPoint.y;
+                float dx = x - mOldPoint.x;
+                float dy = y - mOldPoint.y;
                 mDebugRect.left += dx;
                 mDebugRect.top += dy;
                 mDebugRect.right += dx;
                 mDebugRect.bottom += dy;
-                mStartPoint.x = x;
-                mStartPoint.y = y;
+                mOldPoint.x = x;
+                mOldPoint.y = y;
                 draw();
                 break;
         }
@@ -91,6 +91,7 @@ public class PhotoView extends SurfaceView implements SurfaceHolder.Callback {
                         paint.setStyle(Paint.Style.STROKE);
                         paint.setStrokeWidth(10f);
                         mCanvas.drawRect(mDebugRect, paint);
+
                     }
                 }
             } finally {
